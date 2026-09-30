@@ -63,32 +63,22 @@ interface SystemContextType {
 const SystemContext = createContext<SystemContextType | undefined>(undefined);
 
 const STORAGE_KEYS = {
-  PROFILE: 'solo_leveling_profile_v3',
-  QUESTS: 'solo_leveling_quests_v3',
-  GATES: 'solo_leveling_gates_v3',
-  SKILLS: 'solo_leveling_skills_v3',
-  RECORDS: 'solo_leveling_records_v3',
-  LOGS: 'solo_leveling_logs_v3',
-  SOUND: 'solo_leveling_sound_v3',
+  PROFILE: 'solo_leveling_profile_v4',
+  QUESTS: 'solo_leveling_quests_v4',
+  GATES: 'solo_leveling_gates_v4',
+  SKILLS: 'solo_leveling_skills_v4',
+  RECORDS: 'solo_leveling_records_v4',
+  LOGS: 'solo_leveling_logs_v4',
+  SOUND: 'solo_leveling_sound_v4',
 };
 
-// Clear legacy test caches if present
+// Force full reset to zero (Level 1, Rank E, base stats) requested by user
+const RESET_TRIGGER_KEY = 'solo_leveling_full_reset_trigger_v4';
 if (typeof window !== 'undefined') {
-  const legacyKeys = [
-    'solo_leveling_profile_v1',
-    'solo_leveling_quests_v1',
-    'solo_leveling_gates_v1',
-    'solo_leveling_skills_v1',
-    'solo_leveling_records_v1',
-    'solo_leveling_logs_v1',
-    'solo_leveling_profile_v2',
-    'solo_leveling_quests_v2',
-    'solo_leveling_gates_v2',
-    'solo_leveling_skills_v2',
-    'solo_leveling_records_v2',
-    'solo_leveling_logs_v2',
-  ];
-  legacyKeys.forEach((k) => localStorage.removeItem(k));
+  if (!localStorage.getItem(RESET_TRIGGER_KEY)) {
+    localStorage.clear();
+    localStorage.setItem(RESET_TRIGGER_KEY, 'done');
+  }
 }
 
 export const SystemProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
