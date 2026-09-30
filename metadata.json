@@ -1,0 +1,6 @@
+{
+  "name": "Système Solo Leveling - Calisthénie",
+  "description": "Application web mobile de suivi de calisthénie inspirée du Système de Solo Leveling avec écran de statut, quêtes journalières, jauges cycliques, portails et compétences.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
