@@ -55,6 +55,9 @@ interface SystemContextType {
   showNotification: (title: string, message: string, type?: SystemNotification['type']) => void;
   dismissNotification: () => void;
   resetAllData: () => void;
+  restoreLevel: (targetLevel: number) => void;
+  exportBackupCode: () => string;
+  importBackupCode: (code: string) => boolean;
 }
 
 const SystemContext = createContext<SystemContextType | undefined>(undefined);
@@ -628,6 +631,75 @@ export const SystemProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     showNotification('SÉANCE ENREGISTRÉE', `Entraînement "${title}" consigné. +${reps * 4} XP !`, 'system');
   };
 
+  const restoreLevel = (targetLevel: number) => {
+    const validLevel = Math.max(1, Math.min(100, Math.round(targetLevel)));
+    let newRank: HunterRank = 'E';
+    if (validLevel >= 40) newRank = 'S';
+    else if (validLevel >= 30) newRank = 'A';
+    else if (validLevel >= 22) newRank = 'B';
+    else if (validLevel >= 15) newRank = 'C';
+    else if (validLevel >= 8) newRank = 'D';
+
+    const pointsGained = (validLevel - 1) * 3;
+    const calcMaxHp = Math.round(100 * Math.pow(1.08, validLevel - 1));
+    const calcMaxMp = Math.round(50 * Math.pow(1.05, validLevel - 1));
+
+    // Calculate approx xpToNextLevel
+    let xpNext = 100;
+    for (let i = 1; i < validLevel; i++) {
+      xpNext = Math.round(xpNext * 1.25);
+    }
+
+    setProfile((prev) => ({
+      ...prev,
+      level: validLevel,
+      rank: newRank,
+      xp: 0,
+      xpToNextLevel: xpNext,
+      availablePoints: pointsGained,
+      hp: calcMaxHp,
+      maxHp: calcMaxHp,
+      mp: calcMaxMp,
+      maxMp: calcMaxMp,
+      fatigue: 0,
+    }));
+
+    sounds.playLevelUp();
+    showNotification('RANG RÉTABLI', `Niveau ${validLevel} (Rang ${newRank}) rétabli avec succès ! +${pointsGained} points disponibles.`, 'levelup');
+  };
+
+  const exportBackupCode = () => {
+    const payload = {
+      profile,
+      quests,
+      gates,
+      skills,
+      records,
+      workoutLogs,
+      exportedAt: Date.now(),
+    };
+    return btoa(encodeURIComponent(JSON.stringify(payload)));
+  };
+
+  const importBackupCode = (code: string): boolean => {
+    try {
+      const decoded = decodeURIComponent(atob(code.trim()));
+      const data = JSON.parse(decoded);
+      if (data.profile) setProfile(data.profile);
+      if (data.quests) setQuests(data.quests);
+      if (data.gates) setGates(data.gates);
+      if (data.skills) setSkills(data.skills);
+      if (data.records) setRecords(data.records);
+      if (data.workoutLogs) setWorkoutLogs(data.workoutLogs);
+      sounds.playLevelUp();
+      showNotification('SYNCHRONISATION TERMINÉE', 'Données de progression restaurées avec succès !', 'levelup');
+      return true;
+    } catch {
+      showNotification('ERREUR DE CODE', 'Le code de transfert est invalide ou corrompu.', 'warning');
+      return false;
+    }
+  };
+
   const resetAllData = () => {
     localStorage.clear();
     setProfile(INITIAL_HUNTER_PROFILE);
@@ -675,6 +747,9 @@ export const SystemProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         showNotification,
         dismissNotification,
         resetAllData,
+        restoreLevel,
+        exportBackupCode,
+        importBackupCode,
       }}
     >
       {children}
