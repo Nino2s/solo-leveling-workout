@@ -15,6 +15,7 @@ import {
   Download,
   Upload,
   X,
+  Trash2,
 } from 'lucide-react';
 import hunterAvatarImg from '../assets/images/hunter_avatar_solo_1790358847156.jpg';
 import { useSystem } from '../context/SystemContext';
@@ -83,6 +84,7 @@ export const StatusScreen: React.FC = () => {
     restoreLevel,
     exportBackupCode,
     importBackupCode,
+    resetAllData,
   } = useSystem();
 
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -580,6 +582,27 @@ export const StatusScreen: React.FC = () => {
                   Importer et Remplacer mes Données
                 </button>
               </div>
+            </div>
+
+            {/* Section 3: Remise à Zéro Complète */}
+            <div className="p-3.5 rounded-xl bg-red-950/20 border border-red-500/30 space-y-2">
+              <div className="flex items-center gap-2 text-rose-400 font-system text-xs font-bold uppercase">
+                <Trash2 size={14} className="text-rose-400" />
+                Option 3 : Remise à Zéro (Nouveau Départ)
+              </div>
+              <p className="text-[11px] text-slate-300 leading-relaxed font-system">
+                Vous voulez recommencer comme au premier jour ? Ce bouton réinitialise le profil au <strong>Niveau 1, Rang E</strong>, avec les 5 statistiques à leur base (10) et 0 fatigue.
+              </p>
+              <button
+                onClick={() => {
+                  resetAllData();
+                  setShowRestoreModal(false);
+                }}
+                className="w-full py-2 px-3 rounded-lg border border-rose-500/50 bg-rose-950/50 hover:bg-rose-900/60 text-rose-200 text-xs font-system font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-[0_0_10px_rgba(244,63,94,0.2)] cursor-pointer"
+              >
+                <RotateCcw size={13} className="text-rose-400" />
+                Remettre le Système à Zéro (Niveau 1, Rang E)
+              </button>
             </div>
 
             {/* Footer close */}
