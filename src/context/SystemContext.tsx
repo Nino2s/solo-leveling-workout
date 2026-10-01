@@ -398,9 +398,21 @@ export const SystemProvider: React.FC<{ children: ReactNode }> = ({ children }) 
               'system'
             );
           }
+          // Calcul dynamique de la fatigue : ~8% à 12% par série selon le volume de reps
+          const fatigueGain = Math.max(8, Math.min(25, Math.round(amount * 0.8)));
+          const nextFatigue = Math.min(100, p.fatigue + fatigueGain);
+
+          if (nextFatigue >= 80 && p.fatigue < 80) {
+            showNotification(
+              'AVERTISSEMENT DU SYSTÈME',
+              'Fatigue élevée (+80%). Vos muscles sont proches de l\'épuisement.',
+              'system'
+            );
+          }
+
           return {
             ...p,
-            fatigue: Math.min(100, p.fatigue + 2),
+            fatigue: nextFatigue,
             stats: {
               ...p.stats,
               [targetItem.statBonus]: bonusStat,
