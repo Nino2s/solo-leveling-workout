@@ -19,7 +19,7 @@ import {
   INITIAL_RECORDS,
   INITIAL_WORKOUT_LOGS,
 } from '../data/initialData';
-import { sounds, triggerHaptic, speakSystem } from '../utils/audio';
+import { sounds } from '../utils/audio';
 
 interface SystemContextType {
   profile: HunterProfile;
@@ -58,24 +58,6 @@ interface SystemContextType {
   restoreLevel: (targetLevel: number) => void;
   exportBackupCode: () => string;
   importBackupCode: (code: string) => boolean;
-
-  // Chronometer & Rest Timer System
-  restSecondsLeft: number;
-  restTotalSeconds: number;
-  isRestActive: boolean;
-  isRestPaused: boolean;
-  restExerciseName: string;
-  autoRestDuration: number;
-  isAutoRestEnabled: boolean;
-  voiceEnabled: boolean;
-  startRestTimer: (seconds?: number, exerciseName?: string) => void;
-  pauseRestTimer: () => void;
-  resumeRestTimer: () => void;
-  stopRestTimer: () => void;
-  addRestSeconds: (seconds: number) => void;
-  setAutoRestDuration: (sec: number) => void;
-  setIsAutoRestEnabled: (val: boolean) => void;
-  setVoiceEnabled: (val: boolean) => void;
 }
 
 const SystemContext = createContext<SystemContextType | undefined>(undefined);
@@ -163,118 +145,6 @@ export const SystemProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [activeNotification, setActiveNotification] = useState<SystemNotification | null>(null);
   const [isRewardModalOpen, setIsRewardModalOpen] = useState(false);
   const [isPenaltyModalOpen, setIsPenaltyModalOpen] = useState(false);
-
-  // Chronometer & Rest Timer State
-  const [restSecondsLeft, setRestSecondsLeft] = useState<number>(0);
-  const [restTotalSeconds, setRestTotalSeconds] = useState<number>(60);
-  const [isRestActive, setIsRestActive] = useState<boolean>(false);
-  const [isRestPaused, setIsRestPaused] = useState<boolean>(false);
-  const [restExerciseName, setRestExerciseName] = useState<string>('');
-
-  const [autoRestDuration, setAutoRestDurationState] = useState<number>(() => {
-    const saved = localStorage.getItem('solo_leveling_auto_rest_duration');
-    return saved ? parseInt(saved, 10) : 60;
-  });
-  const [isAutoRestEnabled, setIsAutoRestEnabledState] = useState<boolean>(() => {
-    const saved = localStorage.getItem('solo_leveling_auto_rest_enabled');
-    return saved !== null ? JSON.parse(saved) : true;
-  });
-  const [voiceEnabled, setVoiceEnabledState] = useState<boolean>(() => {
-    const saved = localStorage.getItem('solo_leveling_voice_enabled');
-    return saved !== null ? JSON.parse(saved) : true;
-  });
-
-  const setAutoRestDuration = (sec: number) => {
-    const valid = Math.max(10, Math.min(600, sec));
-    setAutoRestDurationState(valid);
-    localStorage.setItem('solo_leveling_auto_rest_duration', String(valid));
-  };
-
-  const setIsAutoRestEnabled = (val: boolean) => {
-    setIsAutoRestEnabledState(val);
-    localStorage.setItem('solo_leveling_auto_rest_enabled', JSON.stringify(val));
-  };
-
-  const setVoiceEnabled = (val: boolean) => {
-    setVoiceEnabledState(val);
-    localStorage.setItem('solo_leveling_voice_enabled', JSON.stringify(val));
-  };
-
-  const startRestTimer = (seconds?: number, exerciseName?: string) => {
-    const dur = seconds !== undefined && seconds > 0 ? seconds : autoRestDuration;
-    setRestTotalSeconds(dur);
-    setRestSecondsLeft(dur);
-    setIsRestActive(true);
-    setIsRestPaused(false);
-    if (exerciseName) setRestExerciseName(exerciseName);
-
-    sounds.playHoloChime();
-    triggerHaptic('medium');
-    if (voiceEnabled) {
-      speakSystem(`Repos de ${dur} secondes.`);
-    }
-  };
-
-  const pauseRestTimer = () => {
-    setIsRestPaused(true);
-    triggerHaptic('light');
-  };
-
-  const resumeRestTimer = () => {
-    setIsRestPaused(false);
-    triggerHaptic('light');
-  };
-
-  const stopRestTimer = () => {
-    setIsRestActive(false);
-    setRestSecondsLeft(0);
-    triggerHaptic('light');
-  };
-
-  const addRestSeconds = (sec: number) => {
-    setRestSecondsLeft((prev) => prev + sec);
-    setRestTotalSeconds((prev) => Math.max(prev, prev + sec));
-    sounds.playTimerTick(false);
-    triggerHaptic('light');
-  };
-
-  // Rest Timer Real-Time Countdown
-  useEffect(() => {
-    if (!isRestActive || isRestPaused) return;
-
-    const interval = setInterval(() => {
-      setRestSecondsLeft((prev) => {
-        if (prev <= 1) {
-          sounds.playRestCompleteAlert();
-          triggerHaptic('success');
-          if (voiceEnabled) {
-            speakSystem("Repos terminé ! Prochaine série !");
-          }
-          showNotification(
-            'REPOS TERMINÉ',
-            restExerciseName
-              ? `Prêt pour la série suivante de ${restExerciseName} !`
-              : 'Le compte à rebours est écoulé. Reprenez le combat !',
-            'quest'
-          );
-          setIsRestActive(false);
-          return 0;
-        }
-
-        const next = prev - 1;
-        if (next === 3 || next === 2 || next === 1) {
-          sounds.playCountdownBeep(next);
-          triggerHaptic('medium');
-          if (voiceEnabled) {
-            speakSystem(String(next));
-          }
-        }
-        return next;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [isRestActive, isRestPaused, voiceEnabled, restExerciseName]);
 
   // Sync to localStorage
   useEffect(() => {
@@ -870,22 +740,6 @@ export const SystemProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         restoreLevel,
         exportBackupCode,
         importBackupCode,
-        restSecondsLeft,
-        restTotalSeconds,
-        isRestActive,
-        isRestPaused,
-        restExerciseName,
-        autoRestDuration,
-        isAutoRestEnabled,
-        voiceEnabled,
-        startRestTimer,
-        pauseRestTimer,
-        resumeRestTimer,
-        stopRestTimer,
-        addRestSeconds,
-        setAutoRestDuration,
-        setIsAutoRestEnabled,
-        setVoiceEnabled,
       }}
     >
       {children}

@@ -10,12 +10,9 @@ import {
   Flame,
   Dumbbell,
   ShieldAlert,
-  Timer,
-  Zap,
 } from 'lucide-react';
 import { useSystem } from '../context/SystemContext';
 import { DailyQuestItem } from '../types/system';
-import { WorkoutActiveModal } from './WorkoutActiveModal';
 
 export const QuestsScreen: React.FC = () => {
   const {
@@ -24,13 +21,9 @@ export const QuestsScreen: React.FC = () => {
     claimQuestRewards,
     openRewardModal,
     openPenaltyModal,
-    startRestTimer,
-    isRestActive,
-    restSecondsLeft,
   } = useSystem();
 
   const [activeItemModal, setActiveItemModal] = useState<DailyQuestItem | null>(null);
-  const [activeWorkoutItem, setActiveWorkoutItem] = useState<DailyQuestItem | null>(null);
   const [customRepInput, setCustomRepInput] = useState<string>('10');
   const [timeLeftStr, setTimeLeftStr] = useState<string>('12h 45m 20s');
 
@@ -173,53 +166,6 @@ export const QuestsScreen: React.FC = () => {
         </button>
       </div>
 
-      {/* Active Workout Session Banner */}
-      <div className="p-3.5 rounded-xl bg-gradient-to-r from-cyan-950/80 via-[#071b30] to-cyan-950/80 border-2 border-cyan-400 shadow-[0_0_20px_rgba(0,210,255,0.25)] flex flex-col gap-2.5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-cyan-500 text-black flex items-center justify-center font-bold shadow-[0_0_10px_#00d2ff]">
-              <Timer size={18} />
-            </div>
-            <div>
-              <div className="text-xs font-system font-bold text-white uppercase tracking-wider text-glow-cyan">
-                MODE SÉANCE ACTIVE & REPOS
-              </div>
-              <div className="text-[10px] text-cyan-300 font-system">
-                Compteur tactile géant, bips sonores et voix du Système
-              </div>
-            </div>
-          </div>
-          {isRestActive && (
-            <div className="px-2 py-1 rounded bg-amber-500/20 border border-amber-400 text-amber-300 text-[10px] font-mono-tech font-bold animate-pulse">
-              REPOS: {restSecondsLeft}s
-            </div>
-          )}
-        </div>
-
-        {/* Quick Launch Buttons */}
-        <div className="flex items-center gap-2 pt-1 border-t border-cyan-500/20">
-          <button
-            onClick={() => {
-              const target = quests.items.find((i) => i.current < i.target) || quests.items[0];
-              setActiveWorkoutItem(target);
-            }}
-            className="flex-1 py-2 px-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black font-system font-bold text-xs uppercase tracking-wider transition-all shadow-[0_0_12px_#00d2ff] active:scale-95 flex items-center justify-center gap-1.5"
-          >
-            <Zap size={14} className="fill-black" />
-            <span>Lancer la Séance Interactive</span>
-          </button>
-
-          <button
-            onClick={() => startRestTimer(60, 'Récupération libre')}
-            className="py-2 px-3 rounded-lg bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 font-system text-xs font-semibold transition-all active:scale-95 flex items-center gap-1.5 shrink-0"
-            title="Lancer un chrono de repos libre de 60s"
-          >
-            <Timer size={13} className="text-cyan-400" />
-            <span>+60s Repos</span>
-          </button>
-        </div>
-      </div>
-
       {/* 4 Exercise Quest Items */}
       <div className="space-y-3">
         {quests.items.map((item) => {
@@ -305,27 +251,10 @@ export const QuestsScreen: React.FC = () => {
                   <Plus size={11} /> Saisie
                 </button>
               </div>
-
-              {/* Big Touch Active Workout Button */}
-              <button
-                onClick={() => setActiveWorkoutItem(item)}
-                className="w-full mt-2.5 py-2 px-3 rounded-lg bg-cyan-950/80 hover:bg-cyan-900/90 border border-cyan-400/50 hover:border-cyan-300 text-cyan-300 font-system font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-[0_0_12px_rgba(0,210,255,0.15)] active:scale-98"
-              >
-                <Flame size={14} className="text-cyan-400" />
-                <span>Mode Séance (Compteur Géant + Repos)</span>
-              </button>
             </div>
           );
         })}
       </div>
-
-      {/* Interactive Workout Active Full-Screen Modal */}
-      {activeWorkoutItem && (
-        <WorkoutActiveModal
-          item={activeWorkoutItem}
-          onClose={() => setActiveWorkoutItem(null)}
-        />
-      )}
 
       {/* Custom Rep Logger Bottom Modal */}
       {activeItemModal && (

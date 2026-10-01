@@ -10,7 +10,6 @@ import { RecordsScreen } from './components/RecordsScreen';
 import { NotificationOverlay } from './components/NotificationOverlay';
 import { RewardModal } from './components/RewardModal';
 import { PenaltyModal } from './components/PenaltyModal';
-import { RestTimerBar } from './components/RestTimerBar';
 import { RotateCcw } from 'lucide-react';
 
 const AppContent: React.FC = () => {
@@ -68,10 +67,9 @@ const AppContent: React.FC = () => {
           </div>
         </main>
 
-        {/* Modals & Overlays */}
+        {/* Modals */}
         <RewardModal />
         <PenaltyModal />
-        <RestTimerBar />
 
         {/* Fixed Mobile Bottom Navigation Bar */}
         <BottomNav
