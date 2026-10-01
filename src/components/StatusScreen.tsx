@@ -10,12 +10,6 @@ import {
   Info,
   Edit2,
   Check,
-  Shield,
-  Copy,
-  Download,
-  Upload,
-  X,
-  Trash2,
 } from 'lucide-react';
 import hunterAvatarImg from '../assets/images/hunter_avatar_solo_1790358847156.jpg';
 import { useSystem } from '../context/SystemContext';
@@ -81,55 +75,17 @@ export const StatusScreen: React.FC = () => {
     recoverFatigue,
     updateProfileName,
     updateProfileTitle,
-    restoreLevel,
-    exportBackupCode,
-    importBackupCode,
-    resetAllData,
   } = useSystem();
 
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [tempName, setTempName] = useState(profile.name);
   const [tempTitle, setTempTitle] = useState(profile.title);
   const [showStatHelp, setShowStatHelp] = useState(false);
-  const [showRestoreModal, setShowRestoreModal] = useState(false);
-  const [targetLevel, setTargetLevel] = useState('15');
-  const [backupCodeInput, setBackupCodeInput] = useState('');
-  const [exportedCode, setExportedCode] = useState('');
-  const [copied, setCopied] = useState(false);
 
   const handleSaveProfile = () => {
     updateProfileName(tempName.trim() || 'Chasseur');
     updateProfileTitle(tempTitle.trim() || 'Éveilleur Calisthénie');
     setIsEditingProfile(false);
-  };
-
-  const handleExport = () => {
-    const code = exportBackupCode();
-    setExportedCode(code);
-    navigator.clipboard.writeText(code).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 3000);
-    }).catch(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 3000);
-    });
-  };
-
-  const handleImport = () => {
-    if (!backupCodeInput.trim()) return;
-    const ok = importBackupCode(backupCodeInput.trim());
-    if (ok) {
-      setBackupCodeInput('');
-      setShowRestoreModal(false);
-    }
-  };
-
-  const handleApplyLevel = () => {
-    const lvl = parseInt(targetLevel, 10);
-    if (!isNaN(lvl) && lvl >= 1 && lvl <= 100) {
-      restoreLevel(lvl);
-      setShowRestoreModal(false);
-    }
   };
 
   const xpPercent = Math.min(100, Math.round((profile.xp / profile.xpToNextLevel) * 100));
@@ -318,17 +274,6 @@ export const StatusScreen: React.FC = () => {
             Récupération
           </button>
         </div>
-
-        {/* Restore / Transfer Data Action Button */}
-        <div className="mt-2.5 pt-2 border-t border-cyan-500/20">
-          <button
-            onClick={() => setShowRestoreModal(true)}
-            className="w-full py-2 px-3 rounded-lg border border-cyan-400/50 bg-cyan-950/60 hover:bg-cyan-900/60 text-cyan-300 text-xs font-system font-bold flex items-center justify-center gap-2 transition-all hover:border-cyan-300 shadow-[0_0_12px_rgba(0,210,255,0.2)] active:scale-98"
-          >
-            <RotateCcw size={14} className="text-cyan-400" />
-            RÉTABLIR MON NIVEAU / SYNCHRONISER SAUVEGARDE
-          </button>
-        </div>
       </div>
 
       {/* Available Points Announcement Banner */}
@@ -480,143 +425,6 @@ export const StatusScreen: React.FC = () => {
           );
         })}
       </div>
-
-      {/* Restore & Synchronize Modal */}
-      {showRestoreModal && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="cyber-box w-full max-w-md rounded-2xl p-5 border-2 border-cyan-400 bg-slate-950 shadow-[0_0_30px_rgba(0,210,255,0.3)] space-y-4 max-h-[90vh] overflow-y-auto">
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-cyan-500/30 pb-3">
-              <div className="flex items-center gap-2">
-                <Shield size={18} className="text-cyan-400" />
-                <h3 className="font-system font-bold text-white text-sm uppercase tracking-wider">
-                  Matrice de Sauvegarde & Niveau
-                </h3>
-              </div>
-              <button
-                onClick={() => setShowRestoreModal(false)}
-                className="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-800"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {/* Section 1: Rétablir directement mon Niveau (ex: 15) */}
-            <div className="p-3.5 rounded-xl bg-cyan-950/40 border border-cyan-500/40 space-y-2.5">
-              <div className="flex items-center gap-2 text-cyan-300 font-system text-xs font-bold uppercase">
-                <Sparkles size={14} className="text-cyan-400" />
-                Option 1 : Rétablir directement mon Niveau
-              </div>
-              <p className="text-[11px] text-slate-300 leading-relaxed font-system">
-                Si vous avez changé de lien ou d'appareil, entrez votre niveau précédent. Le Système recalculera automatiquement votre <strong>Rang</strong>, votre <strong>PV / PM Max</strong> et vous redonnera tous vos <strong>points de stats</strong> à réallouer !
-              </p>
-              <div className="flex items-center gap-2 pt-1">
-                <div className="flex-1 flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-lg border border-cyan-500/30">
-                  <span className="text-xs text-slate-400 font-system">Niveau :</span>
-                  <input
-                    type="number"
-                    min="1"
-                    max="100"
-                    value={targetLevel}
-                    onChange={(e) => setTargetLevel(e.target.value)}
-                    className="w-full bg-transparent text-cyan-300 font-mono-tech font-bold text-sm outline-none"
-                    placeholder="15"
-                  />
-                </div>
-                <button
-                  onClick={handleApplyLevel}
-                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-black text-xs font-system font-bold transition-all shadow-[0_0_15px_rgba(0,210,255,0.4)] active:scale-95 whitespace-nowrap"
-                >
-                  Appliquer Niveau {targetLevel}
-                </button>
-              </div>
-            </div>
-
-            {/* Section 2: Code de Transfert entre appareils */}
-            <div className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-700/60 space-y-3">
-              <div className="flex items-center gap-2 text-slate-200 font-system text-xs font-bold uppercase">
-                <Download size={14} className="text-cyan-400" />
-                Option 2 : Code de Transfert Intégral
-              </div>
-              <p className="text-[11px] text-slate-400 leading-relaxed font-system">
-                Pour cloner l'intégralité exacte (records, historiques de séances, donjons terminés) depuis un autre lien :
-              </p>
-
-              {/* Exporter */}
-              <div className="space-y-1.5 pt-1">
-                <button
-                  onClick={handleExport}
-                  className="w-full py-2 px-3 rounded-lg border border-cyan-500/30 bg-cyan-950/30 hover:bg-cyan-900/40 text-cyan-300 text-[11px] font-system font-semibold flex items-center justify-center gap-2 transition-all"
-                >
-                  <Copy size={13} />
-                  {copied ? '✓ Code copié dans le presse-papier !' : 'Générer & Copier le Code de cette session'}
-                </button>
-                {exportedCode && (
-                  <p className="text-[9px] text-emerald-400 font-mono-tech text-center">
-                    Code prêt ! Collez-le sur votre autre lien ou appareil.
-                  </p>
-                )}
-              </div>
-
-              {/* Importer */}
-              <div className="space-y-1.5 pt-2 border-t border-slate-800">
-                <span className="text-[11px] text-slate-300 font-system font-medium flex items-center gap-1.5">
-                  <Upload size={12} className="text-cyan-400" /> Coller un Code de Transfert :
-                </span>
-                <input
-                  type="text"
-                  value={backupCodeInput}
-                  onChange={(e) => setBackupCodeInput(e.target.value)}
-                  placeholder="Collez le code de sauvegarde ici..."
-                  className="w-full px-3 py-1.5 text-xs rounded-lg bg-slate-950 border border-slate-700 text-cyan-300 font-mono-tech focus:border-cyan-400 outline-none"
-                />
-                <button
-                  onClick={handleImport}
-                  disabled={!backupCodeInput.trim()}
-                  className={`w-full py-2 rounded-lg text-xs font-system font-bold transition-all ${
-                    backupCodeInput.trim()
-                      ? 'bg-cyan-500 text-black shadow-[0_0_10px_#00d2ff] hover:bg-cyan-400 active:scale-95 cursor-pointer'
-                      : 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                  }`}
-                >
-                  Importer et Remplacer mes Données
-                </button>
-              </div>
-            </div>
-
-            {/* Section 3: Remise à Zéro Complète */}
-            <div className="p-3.5 rounded-xl bg-red-950/20 border border-red-500/30 space-y-2">
-              <div className="flex items-center gap-2 text-rose-400 font-system text-xs font-bold uppercase">
-                <Trash2 size={14} className="text-rose-400" />
-                Option 3 : Remise à Zéro (Nouveau Départ)
-              </div>
-              <p className="text-[11px] text-slate-300 leading-relaxed font-system">
-                Vous voulez recommencer comme au premier jour ? Ce bouton réinitialise le profil au <strong>Niveau 1, Rang E</strong>, avec les 5 statistiques à leur base (10) et 0 fatigue.
-              </p>
-              <button
-                onClick={() => {
-                  resetAllData();
-                  setShowRestoreModal(false);
-                }}
-                className="w-full py-2 px-3 rounded-lg border border-rose-500/50 bg-rose-950/50 hover:bg-rose-900/60 text-rose-200 text-xs font-system font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-[0_0_10px_rgba(244,63,94,0.2)] cursor-pointer"
-              >
-                <RotateCcw size={13} className="text-rose-400" />
-                Remettre le Système à Zéro (Niveau 1, Rang E)
-              </button>
-            </div>
-
-            {/* Footer close */}
-            <div className="pt-2 text-center">
-              <button
-                onClick={() => setShowRestoreModal(false)}
-                className="text-xs text-slate-400 hover:text-white font-system underline"
-              >
-                Fermer la fenêtre
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
